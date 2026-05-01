@@ -1,0 +1,36 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql" // <-- Changed this line
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  entries   Entry[]
+  createdAt DateTime @default(now())
+}
+
+model Entry {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text // @db.Text is good for longer strings in MySQL
+  solution    String?  @db.Text
+  severity    String   
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  tags        Tag[]    @relation("EntryTags")
+  createdAt   DateTime @default(now())
+}
+
+model Tag {
+  id      String  @id @default(uuid())
+  name    String  @unique
+  entries Entry[] @relation("EntryTags")
+}
